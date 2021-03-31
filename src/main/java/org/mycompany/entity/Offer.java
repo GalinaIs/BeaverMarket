@@ -12,6 +12,7 @@ public class Offer {
     private Long id;
     private int count;
     private int price;
+    private int availableCount;
     @Enumerated(EnumType.STRING)
     private OfferType type;
 
@@ -19,9 +20,10 @@ public class Offer {
 
     }
 
-    public Offer(int count, int price, OfferType type) {
+    public Offer(int count, int price, int availableCount, OfferType type) {
         this.count = count;
         this.price = price;
+        this.availableCount = availableCount;
         this.type = type;
     }
 }

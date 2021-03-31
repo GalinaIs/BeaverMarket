@@ -1,19 +1,15 @@
 package org.mycompany.repository;
 
 import org.mycompany.entity.Offer;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.Repository;
 
 import java.util.List;
 
-public interface OfferRepository extends Repository<Offer, Long> {
-    @Query("SELECT offer FROM Offer offer WHERE price >= :price AND type IS 'BUY'")
+public interface OfferRepository extends JpaRepository<Offer, Long> {
+    @Query("SELECT offer FROM Offer offer WHERE price >= :price AND type IS 'BUY' AND available_count > 0")
     List<Offer> findBuyOffersByPriceMoreThanEqual(int price);
 
-    @Query("SELECT offer FROM Offer offer WHERE price <= :price AND type IS 'SELL'")
+    @Query("SELECT offer FROM Offer offer WHERE price <= :price AND type IS 'SELL' AND available_count > 0")
     List<Offer> findSellOffersByPriceLessThanEqual(int price);
-
-    Offer save(Offer offer);
-
-    void delete(Offer entity);
 }
