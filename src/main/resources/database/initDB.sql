@@ -1,0 +1,8 @@
+CREATE TABLE IF NOT EXISTS offer
+(
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    count INT NOT NULL,
+    price INT NOT NULL,
+    type ENUM('BUY', 'SELL')
+);
+
