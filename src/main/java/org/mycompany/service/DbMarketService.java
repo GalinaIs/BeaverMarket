@@ -3,6 +3,7 @@ package org.mycompany.service;
 import org.mycompany.entity.Offer;
 import org.mycompany.entity.OfferType;
 import org.mycompany.repository.OfferRepository;
+import org.mycompany.service.exception.MarkerServiceException;
 import org.mycompany.service.transaction.TransactionService;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Isolation;
@@ -22,17 +23,25 @@ public class DbMarketService implements MarketService {
     }
 
     @Override
-    public String trySell(int count, int price) {
+    public String trySell(int count, int price) throws MarkerServiceException {
+        validateData(count, price);
         Offer newOffer = new Offer(count, price, count, OfferType.SELL);
         List<Offer> offers = offerRepository.findBuyOffersByPriceMoreThanEqual(price);
         return offers.isEmpty() ? saveSellOffer(newOffer) : sell(newOffer, offers);
     }
 
     @Override
-    public String tryBuy(int count, int price) {
+    public String tryBuy(int count, int price) throws MarkerServiceException {
+        validateData(count, price);
         Offer newOffer = new Offer(count, price, count, OfferType.BUY);
         List<Offer> offers = offerRepository.findSellOffersByPriceLessThanEqual(price);
         return offers.isEmpty() ? saveBuyOffer(newOffer) : buy(newOffer, offers);
+    }
+
+    private void validateData(int count, int price) throws MarkerServiceException {
+        if (count <= 0 || price <= 0) {
+            throw new MarkerServiceException("Заявка не может быть исполнена, т.к. количество и цена должны быть больше 0");
+        }
     }
 
     private String saveSellOffer(Offer offer) {
