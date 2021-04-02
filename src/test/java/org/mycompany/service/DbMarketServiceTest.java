@@ -11,6 +11,8 @@ import org.mycompany.repository.OfferRepository;
 import org.mycompany.repository.TransactionRepository;
 import org.mycompany.repository.UserRepository;
 import org.mycompany.service.exception.MarkerServiceException;
+import org.mycompany.service.offer.DbOfferService;
+import org.mycompany.service.offer.OfferService;
 import org.mycompany.service.transaction.DbTransactionService;
 import org.mycompany.service.transaction.TransactionService;
 import org.mycompany.service.user.DbUserService;
@@ -50,7 +52,8 @@ public class DbMarketServiceTest {
     public void setUp() {
         userService = new DbUserService(userRepository);
         TransactionService transactionService = new DbTransactionService(dealRepository, transactionRepository, userService);
-        marketService = new DbMarketService(offerRepository, transactionService, userService);
+        OfferService offerService = new DbOfferService(offerRepository, transactionService);
+        marketService = new DbMarketService(offerService, userService);
     }
 
     @Test
