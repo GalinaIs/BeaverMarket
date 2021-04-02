@@ -30,6 +30,7 @@ CREATE TABLE IF NOT EXISTS deal
     buy_offer_id BIGINT,
     FOREIGN KEY (buy_offer_id) REFERENCES offer (id) ON UPDATE CASCADE ON DELETE SET NULL,
     count INT NOT NULL,
+    price INT NOT NULL,
     transaction_id BIGINT,
     FOREIGN KEY (transaction_id) REFERENCES transaction (id) ON UPDATE CASCADE ON DELETE SET NULL
 );

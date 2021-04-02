@@ -57,7 +57,7 @@ public class DbMarketServiceTest {
         Assert.assertEquals("Все бобры проданы", marketService.trySell(1, 100, USER2));
         List<Deal> deals = dealRepository.findAll();
         Assert.assertEquals(1, deals.size());
-        assertDeal(deals.get(0), 100, 100, 1);
+        assertDeal(deals.get(0), 100, 100, 1, 100);
     }
 
     @Test
@@ -66,7 +66,7 @@ public class DbMarketServiceTest {
         Assert.assertEquals("Все бобры проданы", marketService.trySell(1, 100, USER2));
         List<Deal> deals = dealRepository.findAll();
         Assert.assertEquals(1, deals.size());
-        assertDeal(deals.get(0), 110, 100, 1);
+        assertDeal(deals.get(0), 110, 100, 1, 110);
     }
 
     @Test
@@ -75,7 +75,7 @@ public class DbMarketServiceTest {
         Assert.assertEquals("Продано 3 бобров. Выставлена заявка на продажу 2 бобров", marketService.trySell(5, 100, USER2));
         List<Deal> deals = dealRepository.findAll();
         Assert.assertEquals(1, deals.size());
-        assertDeal(deals.get(0), 110, 100, 3);
+        assertDeal(deals.get(0), 110, 100, 3, 110);
     }
 
     @Test
@@ -85,8 +85,8 @@ public class DbMarketServiceTest {
         Assert.assertEquals("Все бобры куплены", marketService.tryBuy(2, 105, "user3"));
         List<Deal> deals = dealRepository.findAll();
         Assert.assertEquals(2, deals.size());
-        assertDeal(deals.get(0), 110, 100, 3);
-        assertDeal(deals.get(1), 105, 100, 2);
+        assertDeal(deals.get(0), 110, 100, 3, 110);
+        assertDeal(deals.get(1), 105, 100, 2, 100);
 
     }
 
@@ -97,8 +97,8 @@ public class DbMarketServiceTest {
         Assert.assertEquals("Все бобры проданы", marketService.trySell(3, 90, USER3));
         List<Deal> deals = dealRepository.findAll();
         Assert.assertEquals(2, deals.size());
-        assertDeal(deals.get(0), 105, 100, 2);
-        assertDeal(deals.get(1), 105, 90, 3);
+        assertDeal(deals.get(0), 105, 100, 2, 105);
+        assertDeal(deals.get(1), 105, 90, 3, 105);
     }
 
     @Test
@@ -109,9 +109,9 @@ public class DbMarketServiceTest {
         Assert.assertEquals("Все бобры куплены", marketService.tryBuy(3, 110, USER4));
         List<Deal> deals = dealRepository.findAll();
         Assert.assertEquals(3, deals.size());
-        assertDeal(deals.get(0), 105, 100, 3);
-        assertDeal(deals.get(1), 105, 100, 1);
-        assertDeal(deals.get(2), 110, 100, 3);
+        assertDeal(deals.get(0), 105, 100, 3, 100);
+        assertDeal(deals.get(1), 105, 100, 1, 100);
+        assertDeal(deals.get(2), 110, 100, 3, 100);
     }
 
     @Test
@@ -129,8 +129,8 @@ public class DbMarketServiceTest {
         Assert.assertEquals("Все бобры куплены", marketService.tryBuy(3, 100, USER2));
         List<Deal> deals = dealRepository.findAll();
         Assert.assertEquals(2, deals.size());
-        assertDeal(deals.get(0), 100, 90, 2);
-        assertDeal(deals.get(1), 100, 100, 1);
+        assertDeal(deals.get(0), 100, 90, 2, 90);
+        assertDeal(deals.get(1), 100, 100, 1, 100);
     }
 
 
@@ -141,13 +141,14 @@ public class DbMarketServiceTest {
         Assert.assertEquals("Все бобры проданы", marketService.trySell(3, 100, USER2));
         List<Deal> deals = dealRepository.findAll();
         Assert.assertEquals(2, deals.size());
-        assertDeal(deals.get(0), 110, 100, 2);
-        assertDeal(deals.get(1), 100, 100, 1);
+        assertDeal(deals.get(0), 110, 100, 2, 110);
+        assertDeal(deals.get(1), 100, 100, 1, 100);
     }
 
-    private static void assertDeal(Deal deal, int buyPrice, int sellPrice, int count) {
+    private static void assertDeal(Deal deal, int buyPrice, int sellPrice, int count, int price) {
         Assert.assertEquals(buyPrice, deal.getBuyOffer().getPrice());
         Assert.assertEquals(sellPrice, deal.getSellOffer().getPrice());
         Assert.assertEquals(count, deal.getCount());
+        Assert.assertEquals(price, deal.getPrice());
     }
 }

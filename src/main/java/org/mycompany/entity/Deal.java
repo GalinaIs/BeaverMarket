@@ -17,6 +17,7 @@ public class Deal {
     @JoinColumn(name = "buy_offer_id", referencedColumnName = "id")
     private Offer sellOffer;
     private int count;
+    private int price;
     @ManyToOne
     @JoinColumn(name = "transaction_id", referencedColumnName = "id")
     private Transaction transaction;
@@ -25,10 +26,11 @@ public class Deal {
 
     }
 
-    public Deal(Offer buyOffer, Offer sellOffer, int count, Transaction transaction) {
+    public Deal(Offer buyOffer, Offer sellOffer, int count, int price, Transaction transaction) {
         this.buyOffer = buyOffer;
         this.sellOffer = sellOffer;
         this.count = count;
+        this.price = price;
         this.transaction = transaction;
     }
 }

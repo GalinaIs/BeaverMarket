@@ -35,17 +35,17 @@ public class DbTransactionService implements TransactionService {
                 break;
             }
             Deal newDeal = newOffer.getType() == OfferType.BUY
-                    ? createNewDeal(newOffer, offer, transaction)
-                    : createNewDeal(offer, newOffer, transaction);
+                    ? createNewDeal(newOffer, offer, offer.getPrice(), transaction)
+                    : createNewDeal(offer, newOffer, offer.getPrice(), transaction);
             deals.add(newDeal);
         }
         return deals;
     }
 
-    private Deal createNewDeal(Offer buyOffer, Offer sellOffer, Transaction transaction) {
+    private Deal createNewDeal(Offer buyOffer, Offer sellOffer, int price, Transaction transaction) {
         int dealCount = Math.min(buyOffer.getAvailableCount(), sellOffer.getAvailableCount());
         buyOffer.setAvailableCount(buyOffer.getAvailableCount() - dealCount);
         sellOffer.setAvailableCount(sellOffer.getAvailableCount() - dealCount);
-        return new Deal(buyOffer, sellOffer, dealCount, transaction);
+        return new Deal(buyOffer, sellOffer, dealCount, price, transaction);
     }
 }
