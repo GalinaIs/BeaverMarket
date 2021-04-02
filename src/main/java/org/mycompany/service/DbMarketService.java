@@ -7,13 +7,11 @@ import org.mycompany.repository.OfferRepository;
 import org.mycompany.service.exception.MarkerServiceException;
 import org.mycompany.service.transaction.TransactionService;
 import org.mycompany.service.user.UserService;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-
-@Component
+@Service
 @Transactional(isolation = Isolation.REPEATABLE_READ)
 public class DbMarketService implements MarketService {
     private final OfferRepository offerRepository;

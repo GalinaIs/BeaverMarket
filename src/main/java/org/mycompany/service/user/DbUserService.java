@@ -5,13 +5,14 @@ import org.mycompany.entity.User;
 import org.mycompany.repository.UserRepository;
 import org.mycompany.service.exception.UserServiceException;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Component
+@Service
 @Transactional(isolation = Isolation.REPEATABLE_READ)
 public class DbUserService implements UserService {
     private final UserRepository userRepository;

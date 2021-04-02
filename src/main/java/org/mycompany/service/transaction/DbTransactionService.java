@@ -8,12 +8,13 @@ import org.mycompany.repository.DealRepository;
 import org.mycompany.repository.TransactionRepository;
 import org.mycompany.service.user.UserService;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
-@Component
+@Service
 public class DbTransactionService implements TransactionService {
     private final DealRepository dealRepository;
     private final TransactionRepository transactionRepository;
