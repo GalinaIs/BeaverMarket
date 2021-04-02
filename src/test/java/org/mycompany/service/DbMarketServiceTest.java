@@ -122,6 +122,29 @@ public class DbMarketServiceTest {
         Assert.assertEquals(0, deals.size());
     }
 
+    @Test
+    void makeDealWithMoreAttractivePriceBuy() throws MarkerServiceException {
+        Assert.assertEquals("Выставлена заявка на продажу бобров", marketService.trySell(2, 100, USER1));
+        Assert.assertEquals("Выставлена заявка на продажу бобров", marketService.trySell(2, 90, USER1));
+        Assert.assertEquals("Все бобры куплены", marketService.tryBuy(3, 100, USER2));
+        List<Deal> deals = dealRepository.findAll();
+        Assert.assertEquals(2, deals.size());
+        assertDeal(deals.get(0), 100, 90, 2);
+        assertDeal(deals.get(1), 100, 100, 1);
+    }
+
+
+    @Test
+    void makeDealWithMoreAttractivePriceSell() throws MarkerServiceException {
+        Assert.assertEquals("Выставлена заявка на покупку бобров", marketService.tryBuy(2, 100, USER1));
+        Assert.assertEquals("Выставлена заявка на покупку бобров", marketService.tryBuy(2, 110, USER1));
+        Assert.assertEquals("Все бобры проданы", marketService.trySell(3, 100, USER2));
+        List<Deal> deals = dealRepository.findAll();
+        Assert.assertEquals(2, deals.size());
+        assertDeal(deals.get(0), 110, 100, 2);
+        assertDeal(deals.get(1), 100, 100, 1);
+    }
+
     private static void assertDeal(Deal deal, int buyPrice, int sellPrice, int count) {
         Assert.assertEquals(buyPrice, deal.getBuyOffer().getPrice());
         Assert.assertEquals(sellPrice, deal.getSellOffer().getPrice());
