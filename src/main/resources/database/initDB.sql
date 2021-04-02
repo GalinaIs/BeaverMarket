@@ -1,9 +1,18 @@
+CREATE TABLE IF NOT EXISTS user
+(
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    money INT DEFAULT 0
+);
+
 CREATE TABLE IF NOT EXISTS offer
 (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     count INT NOT NULL,
     price INT NOT NULL,
     available_count INT NOT NULL,
+    user_id BIGINT,
+    FOREIGN KEY (user_id) REFERENCES user (id) ON UPDATE CASCADE ON DELETE SET NULL,
     type ENUM('BUY', 'SELL')
 );
 

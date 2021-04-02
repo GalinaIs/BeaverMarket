@@ -13,6 +13,9 @@ public class Offer {
     private int count;
     private int price;
     private int availableCount;
+    @ManyToOne
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    private User user;
     @Enumerated(EnumType.STRING)
     private OfferType type;
 
