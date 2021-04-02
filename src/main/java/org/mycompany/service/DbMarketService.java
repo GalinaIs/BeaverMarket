@@ -31,7 +31,7 @@ public class DbMarketService implements MarketService {
         validateData(count, price);
         User user = userService.getUser(userName);
         Offer newOffer = new Offer(count, price, count, user, OfferType.SELL);
-        List<Offer> offers = offerRepository.findBuyOffersByPriceMoreThanEqual(price);
+        List<Offer> offers = offerRepository.findBuyOffersByPriceMoreThanEqual(price, user.getId());
         return offers.isEmpty() ? saveSellOffer(newOffer) : sell(newOffer, offers);
     }
 
@@ -40,7 +40,7 @@ public class DbMarketService implements MarketService {
         validateData(count, price);
         User user = userService.getUser(userName);
         Offer newOffer = new Offer(count, price, count, user, OfferType.BUY);
-        List<Offer> offers = offerRepository.findSellOffersByPriceLessThanEqual(price);
+        List<Offer> offers = offerRepository.findSellOffersByPriceLessThanEqual(price, user.getId());
         return offers.isEmpty() ? saveBuyOffer(newOffer) : buy(newOffer, offers);
     }
 
