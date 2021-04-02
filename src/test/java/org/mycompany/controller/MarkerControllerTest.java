@@ -25,12 +25,14 @@ public class MarkerControllerTest {
     public void buyShouldReturnOfferInformation() throws Exception {
         int count = 2;
         int price = 100;
+        String userName = "name";
         String offerInformation = "offerInformation";
-        when(service.tryBuy(count, price)).thenReturn(offerInformation);
+        when(service.tryBuy(count, price, userName)).thenReturn(offerInformation);
 
         this.mockMvc.perform(get("/buy")
                     .param("count", String.valueOf(count))
-                    .param("price", String.valueOf(price)))
+                    .param("price", String.valueOf(price))
+                    .param("userName", userName))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString(offerInformation)));
@@ -40,12 +42,14 @@ public class MarkerControllerTest {
     public void sellShouldReturnOfferInformation() throws Exception {
         int count = 2;
         int price = 100;
+        String userName = "name";
         String offerInformation = "offerInformation";
-        when(service.trySell(count, price)).thenReturn(offerInformation);
+        when(service.trySell(count, price, userName)).thenReturn(offerInformation);
 
         this.mockMvc.perform(get("/sell")
                 .param("count", String.valueOf(count))
-                .param("price", String.valueOf(price)))
+                .param("price", String.valueOf(price))
+                .param("userName", userName))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString(offerInformation)));

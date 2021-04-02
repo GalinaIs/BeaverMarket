@@ -10,8 +10,10 @@ import org.mycompany.repository.TransactionRepository;
 import org.mycompany.service.exception.MarkerServiceException;
 import org.mycompany.service.transaction.DbTransactionService;
 import org.mycompany.service.transaction.TransactionService;
+import org.mycompany.service.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -31,13 +33,15 @@ public class DbMarketServiceTest {
     TransactionRepository transactionRepository;
     @Autowired
     DealRepository dealRepository;
+    @MockBean
+    private UserService userService;
 
     @Test
     void tryBuyAndSellTheSameQuality() throws MarkerServiceException {
         TransactionService transactionService = new DbTransactionService(dealRepository, transactionRepository);
-        DbMarketService marketService = new DbMarketService(offerRepository, transactionService);
-        Assert.assertEquals("Выставлена заявка на покупку бобров", marketService.tryBuy(1, 100));
-        Assert.assertEquals("Все бобры проданы", marketService.trySell(1, 100));
+        DbMarketService marketService = new DbMarketService(offerRepository, transactionService, userService);
+        Assert.assertEquals("Выставлена заявка на покупку бобров", marketService.tryBuy(1, 100, "user1"));
+        Assert.assertEquals("Все бобры проданы", marketService.trySell(1, 100, "user2"));
         List<Deal> deals = dealRepository.findAll();
         Assert.assertEquals(1, deals.size());
         assertDeal(deals.get(0), 100, 100, 1);
@@ -46,9 +50,9 @@ public class DbMarketServiceTest {
     @Test
     void tryBuyMoreQualityThanSell() throws MarkerServiceException {
         TransactionService transactionService = new DbTransactionService(dealRepository, transactionRepository);
-        DbMarketService marketService = new DbMarketService(offerRepository, transactionService);
-        Assert.assertEquals("Выставлена заявка на покупку бобров", marketService.tryBuy(2, 110));
-        Assert.assertEquals("Все бобры проданы", marketService.trySell(1, 100));
+        DbMarketService marketService = new DbMarketService(offerRepository, transactionService, userService);
+        Assert.assertEquals("Выставлена заявка на покупку бобров", marketService.tryBuy(2, 110, "user1"));
+        Assert.assertEquals("Все бобры проданы", marketService.trySell(1, 100, "user2"));
         List<Deal> deals = dealRepository.findAll();
         Assert.assertEquals(1, deals.size());
         assertDeal(deals.get(0), 110, 100, 1);
@@ -57,9 +61,9 @@ public class DbMarketServiceTest {
     @Test
     void tryBuyLessQualityThanSell() throws MarkerServiceException {
         TransactionService transactionService = new DbTransactionService(dealRepository, transactionRepository);
-        DbMarketService marketService = new DbMarketService(offerRepository, transactionService);
-        Assert.assertEquals("Выставлена заявка на покупку бобров", marketService.tryBuy(3, 110));
-        Assert.assertEquals("Продано 3 бобров. Выставлена заявка на продажу 2 бобров", marketService.trySell(5, 100));
+        DbMarketService marketService = new DbMarketService(offerRepository, transactionService, userService);
+        Assert.assertEquals("Выставлена заявка на покупку бобров", marketService.tryBuy(3, 110, "user1"));
+        Assert.assertEquals("Продано 3 бобров. Выставлена заявка на продажу 2 бобров", marketService.trySell(5, 100, "user2"));
         List<Deal> deals = dealRepository.findAll();
         Assert.assertEquals(1, deals.size());
         assertDeal(deals.get(0), 110, 100, 3);
@@ -68,10 +72,10 @@ public class DbMarketServiceTest {
     @Test
     void severalOffersForBuy() throws MarkerServiceException {
         TransactionService transactionService = new DbTransactionService(dealRepository, transactionRepository);
-        DbMarketService marketService = new DbMarketService(offerRepository, transactionService);
-        Assert.assertEquals("Выставлена заявка на покупку бобров", marketService.tryBuy(3, 110));
-        Assert.assertEquals("Продано 3 бобров. Выставлена заявка на продажу 2 бобров", marketService.trySell(5, 100));
-        Assert.assertEquals("Все бобры куплены", marketService.tryBuy(2, 105));
+        DbMarketService marketService = new DbMarketService(offerRepository, transactionService, userService);
+        Assert.assertEquals("Выставлена заявка на покупку бобров", marketService.tryBuy(3, 110, "user1"));
+        Assert.assertEquals("Продано 3 бобров. Выставлена заявка на продажу 2 бобров", marketService.trySell(5, 100, "user2"));
+        Assert.assertEquals("Все бобры куплены", marketService.tryBuy(2, 105, "user3"));
         List<Deal> deals = dealRepository.findAll();
         Assert.assertEquals(2, deals.size());
         assertDeal(deals.get(0), 110, 100, 3);
@@ -82,10 +86,10 @@ public class DbMarketServiceTest {
     @Test
     void severalOffersForSell() throws MarkerServiceException {
         TransactionService transactionService = new DbTransactionService(dealRepository, transactionRepository);
-        DbMarketService marketService = new DbMarketService(offerRepository, transactionService);
-        Assert.assertEquals("Выставлена заявка на покупку бобров", marketService.tryBuy(5, 105));
-        Assert.assertEquals("Все бобры проданы", marketService.trySell(2, 100));
-        Assert.assertEquals("Все бобры проданы", marketService.trySell(3, 90));
+        DbMarketService marketService = new DbMarketService(offerRepository, transactionService, userService);
+        Assert.assertEquals("Выставлена заявка на покупку бобров", marketService.tryBuy(5, 105, "user1"));
+        Assert.assertEquals("Все бобры проданы", marketService.trySell(2, 100, "user2"));
+        Assert.assertEquals("Все бобры проданы", marketService.trySell(3, 90, "user3"));
         List<Deal> deals = dealRepository.findAll();
         Assert.assertEquals(2, deals.size());
         assertDeal(deals.get(0), 105, 100, 2);
@@ -95,11 +99,11 @@ public class DbMarketServiceTest {
     @Test
     void severalOffersForBuyAndSell() throws MarkerServiceException {
         TransactionService transactionService = new DbTransactionService(dealRepository, transactionRepository);
-        DbMarketService marketService = new DbMarketService(offerRepository, transactionService);
-        Assert.assertEquals("Выставлена заявка на продажу бобров", marketService.trySell(3, 100));
-        Assert.assertEquals("Выставлена заявка на продажу бобров", marketService.trySell(5, 100));
-        Assert.assertEquals("Все бобры куплены", marketService.tryBuy(4, 105));
-        Assert.assertEquals("Все бобры куплены", marketService.tryBuy(3, 110));
+        DbMarketService marketService = new DbMarketService(offerRepository, transactionService, userService);
+        Assert.assertEquals("Выставлена заявка на продажу бобров", marketService.trySell(3, 100, "user1"));
+        Assert.assertEquals("Выставлена заявка на продажу бобров", marketService.trySell(5, 100, "user2"));
+        Assert.assertEquals("Все бобры куплены", marketService.tryBuy(4, 105, "user3"));
+        Assert.assertEquals("Все бобры куплены", marketService.tryBuy(3, 110, "user4"));
         List<Deal> deals = dealRepository.findAll();
         Assert.assertEquals(3, deals.size());
         assertDeal(deals.get(0), 105, 100, 3);

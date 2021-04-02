@@ -2,9 +2,11 @@ package org.mycompany.service;
 
 import org.mycompany.entity.Offer;
 import org.mycompany.entity.OfferType;
+import org.mycompany.entity.User;
 import org.mycompany.repository.OfferRepository;
 import org.mycompany.service.exception.MarkerServiceException;
 import org.mycompany.service.transaction.TransactionService;
+import org.mycompany.service.user.UserService;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,24 +18,28 @@ import java.util.List;
 public class DbMarketService implements MarketService {
     private final OfferRepository offerRepository;
     private final TransactionService transactionService;
+    private final UserService userService;
 
-    public DbMarketService(OfferRepository offerRepository, TransactionService transactionService) {
+    public DbMarketService(OfferRepository offerRepository, TransactionService transactionService, UserService userService) {
         this.offerRepository = offerRepository;
         this.transactionService = transactionService;
+        this.userService = userService;
     }
 
     @Override
-    public String trySell(int count, int price) throws MarkerServiceException {
+    public String trySell(int count, int price, String userName) throws MarkerServiceException {
         validateData(count, price);
-        Offer newOffer = new Offer(count, price, count, OfferType.SELL);
+        User user = userService.getUser(userName);
+        Offer newOffer = new Offer(count, price, count, user, OfferType.SELL);
         List<Offer> offers = offerRepository.findBuyOffersByPriceMoreThanEqual(price);
         return offers.isEmpty() ? saveSellOffer(newOffer) : sell(newOffer, offers);
     }
 
     @Override
-    public String tryBuy(int count, int price) throws MarkerServiceException {
+    public String tryBuy(int count, int price, String userName) throws MarkerServiceException {
         validateData(count, price);
-        Offer newOffer = new Offer(count, price, count, OfferType.BUY);
+        User user = userService.getUser(userName);
+        Offer newOffer = new Offer(count, price, count, user, OfferType.BUY);
         List<Offer> offers = offerRepository.findSellOffersByPriceLessThanEqual(price);
         return offers.isEmpty() ? saveBuyOffer(newOffer) : buy(newOffer, offers);
     }

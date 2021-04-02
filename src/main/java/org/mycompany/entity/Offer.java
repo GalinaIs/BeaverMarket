@@ -23,10 +23,11 @@ public class Offer {
 
     }
 
-    public Offer(int count, int price, int availableCount, OfferType type) {
+    public Offer(int count, int price, int availableCount, User user, OfferType type) {
         this.count = count;
         this.price = price;
         this.availableCount = availableCount;
+        this.user = user;
         this.type = type;
     }
 }

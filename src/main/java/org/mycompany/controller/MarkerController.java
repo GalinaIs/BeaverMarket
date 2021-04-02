@@ -15,12 +15,12 @@ public class MarkerController {
     }
 
     @GetMapping("/sell")
-    public String sellBeaver(@RequestParam int count, @RequestParam int price) throws MarkerServiceException {
-        return marketService.trySell(count, price);
+    public String sellBeaver(@RequestParam int count, @RequestParam int price, @RequestParam String userName) throws MarkerServiceException {
+        return marketService.trySell(count, price, userName);
     }
 
     @GetMapping("/buy")
-    public String buyBeaver(@RequestParam int count, @RequestParam int price) throws MarkerServiceException {
-        return marketService.tryBuy(count, price);
+    public String buyBeaver(@RequestParam int count, @RequestParam int price, @RequestParam String userName) throws MarkerServiceException {
+        return marketService.tryBuy(count, price, userName);
     }
 }
