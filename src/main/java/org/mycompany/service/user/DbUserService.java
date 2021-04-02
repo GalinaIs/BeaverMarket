@@ -1,11 +1,15 @@
 package org.mycompany.service.user;
 
+import org.mycompany.entity.Offer;
 import org.mycompany.entity.User;
 import org.mycompany.repository.UserRepository;
 import org.mycompany.service.exception.UserServiceException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 @Transactional(isolation = Isolation.REPEATABLE_READ)
@@ -44,6 +48,15 @@ public class DbUserService implements UserService {
         byName.setMoney(byName.getMoney() - countMoney);
         userRepository.save(byName);
         return "Снятие денег выполнено успешно";
+    }
+
+    @Override
+    public void saveAllUsers(List<Offer> offers, Offer offer) {
+        List<User> users = offers.stream()
+                .map(Offer::getUser)
+                .collect(Collectors.toList());
+        users.add(offer.getUser());
+        userRepository.saveAll(users);
     }
 
     private static void validateCountMoney(int countMoney) throws UserServiceException {

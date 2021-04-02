@@ -61,20 +61,31 @@ public class DbMarketService implements MarketService {
     }
 
     private String sell(Offer newOffer, List<Offer> offers) {
-        return makeTransaction(newOffer, offers, "Все бобры проданы", "Продано %s бобров. Выставлена заявка на продажу %s бобров");
+        makeTransaction(newOffer, offers);
+        if (newOffer.getAvailableCount() == 0) {
+            return "Все бобры проданы";
+        }
+        if (newOffer.getAvailableCount() == newOffer.getCount()) {
+            return "Выставлена заявка на продажу бобров";
+        }
+        return String.format("Продано %s бобров. Выставлена заявка на продажу %s бобров", newOffer.getCount() - newOffer.getAvailableCount(), newOffer.getAvailableCount());
+
     }
 
     private String buy(Offer newOffer, List<Offer> offers) {
-        return makeTransaction(newOffer, offers, "Все бобры куплены", "Куплено %s бобров. Выставлена заявка на покупку %s бобров");
+        makeTransaction(newOffer, offers);
+        if (newOffer.getAvailableCount() == 0) {
+            return "Все бобры куплены";
+        }
+        if (newOffer.getAvailableCount() == newOffer.getCount()) {
+            return "Выставлена заявка на покупку бобров";
+        }
+        return String.format("Куплено %s бобров. Выставлена заявка на покупку %s бобров", newOffer.getCount() - newOffer.getAvailableCount(), newOffer.getAvailableCount());
     }
 
-    private String makeTransaction(Offer newOffer, List<Offer> offers, String returnValue1, String returnValue2) {
+    private void makeTransaction(Offer newOffer, List<Offer> offers) {
         transactionService.transactionProcess(offers, newOffer);
         offerRepository.saveAll(offers);
         offerRepository.save(newOffer);
-        if (newOffer.getAvailableCount() == 0) {
-            return returnValue1;
-        }
-        return String.format(returnValue2, newOffer.getCount() - newOffer.getAvailableCount(), newOffer.getAvailableCount());
     }
 }
