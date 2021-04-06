@@ -23,4 +23,11 @@ public class User {
     public User(String name) {
         this.name = name;
     }
+
+    public User copy() {
+        User user = new User(name);
+        user.id = id;
+        user.money = money;
+        return user;
+    }
 }

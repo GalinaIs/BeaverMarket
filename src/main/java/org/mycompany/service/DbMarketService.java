@@ -7,11 +7,8 @@ import org.mycompany.service.exception.MarkerServiceException;
 import org.mycompany.service.offer.OfferService;
 import org.mycompany.service.user.UserService;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Transactional(isolation = Isolation.REPEATABLE_READ)
 public class DbMarketService implements MarketService {
     private final OfferService offerService;
     private final UserService userService;
@@ -25,7 +22,7 @@ public class DbMarketService implements MarketService {
     public String trySell(int count, int price, String userName) throws MarkerServiceException {
         validateData(count, price);
         User user = userService.getUser(userName);
-        Offer newOffer = new Offer(count, price, count, user, OfferType.SELL);
+        Offer newOffer = new Offer(count, price, count, user.getId(), OfferType.SELL);
         return offerService.trySell(newOffer, user);
     }
 
@@ -33,7 +30,7 @@ public class DbMarketService implements MarketService {
     public String tryBuy(int count, int price, String userName) throws MarkerServiceException {
         validateData(count, price);
         User user = userService.getUser(userName);
-        Offer newOffer = new Offer(count, price, count, user, OfferType.BUY);
+        Offer newOffer = new Offer(count, price, count, user.getId(), OfferType.BUY);
         return offerService.tryBuy(newOffer, user);
     }
 

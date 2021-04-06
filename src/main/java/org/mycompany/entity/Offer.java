@@ -13,21 +13,25 @@ public class Offer {
     private int count;
     private int price;
     private int availableCount;
-    @ManyToOne
-    @JoinColumn(name = "user_id", referencedColumnName = "id")
-    private User user;
+    @Column(name="user_id")
+    private Long userId;
     @Enumerated(EnumType.STRING)
     private OfferType type;
 
     public Offer() {
-
     }
 
-    public Offer(int count, int price, int availableCount, User user, OfferType type) {
+    public Offer(int count, int price, int availableCount, Long userId, OfferType type) {
         this.count = count;
         this.price = price;
         this.availableCount = availableCount;
-        this.user = user;
+        this.userId = userId;
         this.type = type;
+    }
+
+    synchronized public Offer copy() {
+        Offer offer = new Offer(count, price, availableCount, userId, type);
+        offer.id = id;
+        return offer;
     }
 }

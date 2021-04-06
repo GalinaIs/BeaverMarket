@@ -52,7 +52,7 @@ public class DbMarketServiceTest {
     public void setUp() {
         userService = new DbUserService(userRepository);
         TransactionService transactionService = new DbTransactionService(dealRepository, transactionRepository, userService);
-        OfferService offerService = new DbOfferService(offerRepository, transactionService);
+        OfferService offerService = new DbOfferService(offerRepository, userService, transactionService);
         marketService = new DbMarketService(offerService, userService);
     }
 
