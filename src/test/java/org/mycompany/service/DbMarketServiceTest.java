@@ -11,6 +11,7 @@ import org.mycompany.repository.OfferRepository;
 import org.mycompany.repository.TransactionRepository;
 import org.mycompany.repository.UserRepository;
 import org.mycompany.service.exception.MarkerServiceException;
+import org.mycompany.service.exception.UserServiceException;
 import org.mycompany.service.offer.DbOfferService;
 import org.mycompany.service.offer.OfferService;
 import org.mycompany.service.transaction.DbTransactionService;
@@ -29,7 +30,12 @@ import java.util.List;
 @TestPropertySource(properties = {
         "spring.main.banner-mode=off",
         "spring.datasource.platform=h2",
-        "spring.jpa.hibernate.ddl-auto=none"
+        "spring.jpa.hibernate.ddl-auto=none",
+        "log4j.logger.org.hibernate.SQL=debug",
+        "log4j.logger.org.hibernate.type=trace",
+        "hibernate.show_sql=true",
+        "logging.level.org.hibernate.SQL=DEBUG",
+        "logging.level.org.hibernate.type=TRACE"
 })
 public class DbMarketServiceTest {
     private static final String USER1 = "user1";
@@ -51,21 +57,21 @@ public class DbMarketServiceTest {
     @BeforeEach
     public void setUp() {
         userService = new DbUserService(userRepository);
-        TransactionService transactionService = new DbTransactionService(dealRepository, transactionRepository, userService);
-        OfferService offerService = new DbOfferService(offerRepository, userService, transactionService);
+        TransactionService transactionService = new DbTransactionService(transactionRepository, userService);
+        OfferService offerService = new DbOfferService(offerRepository, userService, transactionService, dealRepository);
         marketService = new DbMarketService(offerService, userService);
     }
 
     @Test
-    void tryBuyAndSellTheSameQuality() throws MarkerServiceException {
-        User user1 = userService.getUser(USER1);
-        user1.setMoney(100);
+    void tryBuyAndSellTheSameQuality() throws MarkerServiceException, UserServiceException {
+        userService.addMoney(USER1, 100);
         Assert.assertEquals("Выставлена заявка на покупку бобров", marketService.tryBuy(1, 100, USER1));
+        offerRepository.findAll().get(0);
         Assert.assertEquals("Все бобры проданы", marketService.trySell(1, 100, USER2));
         List<Deal> deals = dealRepository.findAll();
         Assert.assertEquals(1, deals.size());
         assertDeal(deals.get(0), 100, 100, 1, 100);
-        Assert.assertEquals(0, user1.getMoney());
+        Assert.assertEquals(0, userService.getUser(USER1).getMoney());
         Assert.assertEquals(100, userService.getUser(USER2).getMoney());
     }
 
