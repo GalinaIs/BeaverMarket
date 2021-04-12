@@ -11,6 +11,9 @@ public class SellOfferComparator implements Comparator<Offer> {
         if (comparePrice != 0) {
             return comparePrice;
         }
+        if (offer1.getId() == null && offer2.getId() == null) {
+            return 0;
+        }
         if (offer1.getId() == null) {
             return 1;
         }
