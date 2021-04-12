@@ -66,7 +66,6 @@ public class DbMarketServiceTest {
     void tryBuyAndSellTheSameQuality() throws MarkerServiceException, UserServiceException {
         userService.addMoney(USER1, 100);
         Assert.assertEquals("Выставлена заявка на покупку бобров", marketService.tryBuy(1, 100, USER1));
-        offerRepository.findAll().get(0);
         Assert.assertEquals("Все бобры проданы", marketService.trySell(1, 100, USER2));
         List<Deal> deals = dealRepository.findAll();
         Assert.assertEquals(1, deals.size());
@@ -76,28 +75,26 @@ public class DbMarketServiceTest {
     }
 
     @Test
-    void tryBuyMoreQualityThanSell() throws MarkerServiceException {
-        User user1 = userService.getUser(USER1);
-        user1.setMoney(110);
+    void tryBuyMoreQualityThanSell() throws MarkerServiceException, UserServiceException {
+        userService.addMoney(USER1, 110);
         Assert.assertEquals("Выставлена заявка на покупку бобров", marketService.tryBuy(2, 110, USER1));
         Assert.assertEquals("Все бобры проданы", marketService.trySell(1, 100, USER2));
         List<Deal> deals = dealRepository.findAll();
         Assert.assertEquals(1, deals.size());
         assertDeal(deals.get(0), 110, 100, 1, 110);
-        Assert.assertEquals(0, user1.getMoney());
+        Assert.assertEquals(0, userService.getUser(USER1).getMoney());
         Assert.assertEquals(110, userService.getUser(USER2).getMoney());
     }
 
     @Test
-    void tryBuyLessQualityThanSell() throws MarkerServiceException {
-        User user1 = userService.getUser(USER1);
-        user1.setMoney(3 * 110);
+    void tryBuyLessQualityThanSell() throws MarkerServiceException, UserServiceException {
+        userService.addMoney(USER1, 3 * 110);
         Assert.assertEquals("Выставлена заявка на покупку бобров", marketService.tryBuy(3, 110, USER1));
         Assert.assertEquals("Продано 3 бобров. Выставлена заявка на продажу 2 бобров", marketService.trySell(5, 100, USER2));
         List<Deal> deals = dealRepository.findAll();
         Assert.assertEquals(1, deals.size());
         assertDeal(deals.get(0), 110, 100, 3, 110);
-        Assert.assertEquals(0, user1.getMoney());
+        Assert.assertEquals(0, userService.getUser(USER1).getMoney());
         Assert.assertEquals(3 * 110, userService.getUser(USER2).getMoney());
     }
 

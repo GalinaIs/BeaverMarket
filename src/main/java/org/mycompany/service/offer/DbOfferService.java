@@ -18,6 +18,7 @@ import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.NavigableSet;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
@@ -53,13 +54,13 @@ public class DbOfferService implements OfferService {
 
     @Override
     public String trySell(Offer newOffer, User newOfferUser) {
-        Set<Offer> offers = buyOffers.tailSet(newOffer, true);
+        Set<Offer> offers = buyOffers.headSet(newOffer, true);
         offers = offers.stream()
                 .filter(offer -> {
                     User user = userService.getUser(offer.getUserId());
                     return !offer.getUserId().equals(newOfferUser.getId()) && user.getMoney() >= offer.getPrice();
                 })
-                .collect(Collectors.toSet());
+                .collect(Collectors.toCollection(() -> new TreeSet<>(new BuyOfferComparator())));
         return offers.isEmpty() ? saveSellOffer(newOffer) : sell(newOffer, offers);
     }
 
@@ -68,7 +69,7 @@ public class DbOfferService implements OfferService {
         Set<Offer> offers = sellOffers.headSet(newOffer, true);
         offers = offers.stream()
                 .filter(offer -> !offer.getUserId().equals(newOfferUser.getId()) && newOfferUser.getMoney() >= offer.getPrice())
-                .collect(Collectors.toSet());
+                .collect(Collectors.toCollection(() -> new TreeSet<>(new SellOfferComparator())));
         return offers.isEmpty() ? saveBuyOffer(newOffer) : buy(newOffer, offers);
     }
 
