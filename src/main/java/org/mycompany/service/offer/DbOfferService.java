@@ -10,6 +10,8 @@ import org.mycompany.service.offer.comparator.BuyOfferComparator;
 import org.mycompany.service.offer.comparator.SellOfferComparator;
 import org.mycompany.service.transaction.TransactionService;
 import org.mycompany.service.user.UserService;
+import org.mycompany.service.util.ExecuteUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -18,7 +20,6 @@ import java.util.NavigableSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 @Service
@@ -29,13 +30,19 @@ public class DbOfferService implements OfferService {
     private final DealRepository dealRepository;
     private final NavigableSet<Offer> sellOffers = new ConcurrentSkipListSet<>(new SellOfferComparator());
     private final NavigableSet<Offer> buyOffers = new ConcurrentSkipListSet<>(new BuyOfferComparator());
-    private final Executor executor = Executors.newCachedThreadPool();
+    private final Executor executor;
 
-    public DbOfferService(OfferRepository offerRepository, UserService userService, TransactionService transactionService, DealRepository dealRepository) {
+    @Autowired
+    public DbOfferService(OfferRepository offerRepository, UserService userService, TransactionService transactionService, DealRepository dealRepository, Executor executor) {
         this.offerRepository = offerRepository;
         this.userService = userService;
         this.transactionService = transactionService;
         this.dealRepository = dealRepository;
+        this.executor = executor;
+    }
+
+    public DbOfferService(OfferRepository offerRepository, UserService userService, TransactionService transactionService, DealRepository dealRepository) {
+        this(offerRepository, userService, transactionService, dealRepository, null);
     }
 
     @PostConstruct
@@ -66,14 +73,14 @@ public class DbOfferService implements OfferService {
     }
 
     private String saveSellOffer(Offer offer) {
-        executor.execute(() -> {
+        ExecuteUtils.execute(executor, () -> {
             addOfferInDbAndSet(offer);
         });
         return "Выставлена заявка на продажу бобров";
     }
 
     private String saveBuyOffer(Offer offer) {
-        executor.execute(() -> {
+        ExecuteUtils.execute(executor, () -> {
             addOfferInDbAndSet(offer);
         });
         return "Выставлена заявка на покупку бобров";
@@ -104,7 +111,7 @@ public class DbOfferService implements OfferService {
 
     private void makeTransaction(Offer newOffer, Set<Offer> offers) {
         List<Deal> deals = transactionService.transactionProcess(offers, newOffer);
-        executor.execute(() -> {
+        ExecuteUtils.execute(executor, () -> {
             offers.stream().filter(of -> of.getAvailableCount() == 0)
                     .forEach(of -> {
                         if (of.getType() == OfferType.BUY) {

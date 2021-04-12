@@ -4,6 +4,8 @@ import org.mycompany.entity.Offer;
 import org.mycompany.entity.User;
 import org.mycompany.repository.UserRepository;
 import org.mycompany.service.exception.UserServiceException;
+import org.mycompany.service.util.ExecuteUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -12,17 +14,22 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 @Service
 public class DbUserService implements UserService {
     private final UserRepository userRepository;
     private final Map<Long, User> users = new ConcurrentHashMap<>();
-    private final Executor executor = Executors.newCachedThreadPool();
+    private final Executor executor;
+
+    @Autowired
+    public DbUserService(UserRepository userRepository, Executor executor) {
+        this.userRepository = userRepository;
+        this.executor = executor;
+    }
 
     public DbUserService(UserRepository userRepository) {
-        this.userRepository = userRepository;
+        this(userRepository, null);
     }
 
     @PostConstruct
@@ -48,7 +55,7 @@ public class DbUserService implements UserService {
         synchronized (user) {
             user.setMoney(user.getMoney() + countMoney);
         }
-        executor.execute(() -> userRepository.save(user));
+        ExecuteUtils.execute(executor, () -> userRepository.save(user));
         return "Добавление денег выполнено успешно";
     }
 
@@ -65,7 +72,7 @@ public class DbUserService implements UserService {
         synchronized (byName) {
             byName.setMoney(byName.getMoney() - countMoney);
         }
-        executor.execute(() -> userRepository.save(byName));
+        ExecuteUtils.execute(executor, () -> userRepository.save(byName));
         return "Снятие денег выполнено успешно";
     }
 
@@ -79,7 +86,7 @@ public class DbUserService implements UserService {
                 .map(off -> users.get(off.getUserId()).copy())
                 .collect(Collectors.toSet());
         usersSet.add(getUser(offer.getUserId()));
-        executor.execute(() -> userRepository.saveAll(usersSet));
+        ExecuteUtils.execute(executor, () -> userRepository.saveAll(usersSet));
     }
 
     private User findByName(String userName) {

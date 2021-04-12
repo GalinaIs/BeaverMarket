@@ -4,6 +4,8 @@ import org.mycompany.entity.*;
 import org.mycompany.repository.DealRepository;
 import org.mycompany.repository.TransactionRepository;
 import org.mycompany.service.user.UserService;
+import org.mycompany.service.util.ExecuteUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
@@ -11,24 +13,29 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 
 @Service
 public class DbTransactionService implements TransactionService {
     private final TransactionRepository transactionRepository;
     private final UserService userService;
-    private final Executor executor = Executors.newCachedThreadPool();
+    private final Executor executor;
 
-    public DbTransactionService(TransactionRepository transactionRepository, UserService userService) {
+    @Autowired
+    public DbTransactionService(TransactionRepository transactionRepository, UserService userService, Executor executor) {
         this.transactionRepository = transactionRepository;
         this.userService = userService;
+        this.executor = executor;
+    }
+
+    public DbTransactionService(TransactionRepository transactionRepository, UserService userService) {
+        this(transactionRepository, userService, null);
     }
 
     public List<Deal> transactionProcess(Set<Offer> offers, Offer offer) {
         Transaction transaction = new Transaction(new Timestamp(System.currentTimeMillis()));
         transactionRepository.save(transaction);
         List<Deal> deals = dealProcessing(offers, offer, transaction);
-        executor.execute(() -> {
+        ExecuteUtils.execute(executor, () -> {
             userService.saveAllUsers(offers, offer);
         });
         return deals;
